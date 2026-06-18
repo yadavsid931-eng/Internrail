@@ -1,0 +1,135 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global safety net catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reusable primitive validations
+    function isValidId(id) {
+      return id is string 
+        && id.size() <= 128 
+        && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Entity structural validation blueprints ---
+    
+    function isValidCourse(data) {
+      return data.keys().hasAll(['id', 'title', 'shortTitle', 'description', 'passingScore', 'videos'])
+        && data.id is string
+        && data.id.size() <= 128
+        && data.title is string
+        && data.title.size() <= 200
+        && data.shortTitle is string
+        && data.shortTitle.size() <= 64
+        && data.description is string
+        && data.description.size() <= 2000
+        && data.passingScore is number
+        && data.passingScore >= 0
+        && data.passingScore <= 100
+        && data.videos is list;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['id', 'email', 'fullName', 'studentId', 'role', 'isActive'])
+        && data.id is string
+        && data.id.size() <= 128
+        && data.email is string
+        && data.email.size() <= 200
+        && data.fullName is string
+        && data.fullName.size() <= 200
+        && data.studentId is string
+        && data.studentId.size() <= 64
+        && data.role is string
+        && (data.role == 'student' || data.role == 'admin')
+        && data.isActive is bool;
+    }
+
+    function isValidMCQ(data) {
+      return data.keys().hasAll(['id', 'courseId', 'question', 'options', 'correctAnswer'])
+        && data.id is string
+        && data.id.size() <= 128
+        && data.courseId is string
+        && data.courseId.size() <= 128
+        && data.question is string
+        && data.question.size() <= 1000
+        && data.options is list
+        && data.options.size() > 0
+        && data.correctAnswer is number;
+    }
+
+    function isValidCertificate(data) {
+      return data.keys().hasAll(['id', 'userId', 'userName', 'userStudentId', 'courseId', 'courseName', 'issueDate', 'score', 'certificateNumber', 'qrCodeValue'])
+        && data.id is string
+        && data.id.size() <= 128
+        && data.userId is string
+        && data.userId.size() <= 128
+        && data.userName is string
+        && data.userName.size() <= 200
+        && data.userStudentId is string
+        && data.userStudentId.size() <= 64
+        && data.courseId is string
+        && data.courseId.size() <= 128
+        && data.courseName is string
+        && data.courseName.size() <= 200
+        && data.issueDate is string
+        && data.issueDate.size() <= 64
+        && data.score is number
+        && data.score >= 0
+        && data.score <= 100
+        && data.certificateNumber is string
+        && data.certificateNumber.size() <= 128
+        && data.qrCodeValue is string
+        && data.qrCodeValue.size() <= 512;
+    }
+
+    function isValidNotification(data) {
+      return data.keys().hasAll(['id', 'userId', 'title', 'message', 'type', 'isRead', 'date'])
+        && data.id is string
+        && data.id.size() <= 128
+        && data.userId is string
+        && data.userId.size() <= 128
+        && data.title is string
+        && data.title.size() <= 200
+        && data.message is string
+        && data.message.size() <= 1000
+        && data.type is string
+        && data.isRead is bool
+        && data.date is string;
+    }
+
+    // --- Active resource endpoints ---
+
+    match /courses/{courseId} {
+      allow read: if true;
+      allow create, update: if isValidId(courseId) && isValidCourse(request.resource.data);
+      allow delete: if isValidId(courseId);
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if isValidId(userId) && isValidUser(request.resource.data);
+      allow delete: if isValidId(userId);
+    }
+
+    match /mcqs/{mcqId} {
+      allow read: if true;
+      allow create, update: if isValidId(mcqId) && isValidMCQ(request.resource.data);
+      allow delete: if isValidId(mcqId);
+    }
+
+    match /certificates/{certificateId} {
+      allow read: if true;
+      allow create, update: if isValidId(certificateId) && isValidCertificate(request.resource.data);
+      allow delete: if isValidId(certificateId);
+    }
+
+    match /notifications/{notifId} {
+      allow read: if true;
+      allow create, update: if isValidId(notifId) && isValidNotification(request.resource.data);
+      allow delete: if isValidId(notifId);
+    }
+  }
+}

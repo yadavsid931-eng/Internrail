@@ -1,0 +1,115 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Registered learner profile containing course engagement, video trackers, and certificate attachments",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "fullName": { "type": "string" },
+        "studentId": { "type": "string" },
+        "role": { "type": "string", "enum": ["student", "admin"] },
+        "isActive": { "type": "boolean" },
+        "joinedDate": { "type": "string" },
+        "progress": { "type": "object", "description": "Key-value pair mapping courseId to percentage progress" },
+        "watchedVideos": { "type": "array", "description": "Array of video tracking UUIDs completed by the learner" },
+        "passedQuizzes": { "type": "array", "description": "Array of courseIds where examinations were passed" },
+        "certificates": { "type": "array", "description": "Array of unique certificate reference IDs" }
+      },
+      "required": ["id", "email", "fullName", "studentId", "role"]
+    },
+    "Course": {
+      "title": "Course",
+      "description": "Academic course entity containing meta identifiers and nested lectures",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "shortTitle": { "type": "string" },
+        "description": { "type": "string" },
+        "longDescription": { "type": "string" },
+        "duration": { "type": "string" },
+        "icon": { "type": "string" },
+        "color": { "type": "string" },
+        "videos": { "type": "array" },
+        "passingScore": { "type": "number" },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["id", "title", "shortTitle", "description", "videos", "passingScore"]
+    },
+    "MCQQuestion": {
+      "title": "MCQQuestion",
+      "description": "Examinable single-answer multiple choice question details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "courseId": { "type": "string" },
+        "question": { "type": "string" },
+        "options": { "type": "array" },
+        "correctAnswer": { "type": "number" },
+        "explanation": { "type": "string" },
+        "marks": { "type": "number" },
+        "difficulty": { "type": "string", "enum": ["Easy", "Medium", "Hard"] }
+      },
+      "required": ["id", "courseId", "question", "options", "correctAnswer"]
+    },
+    "Certificate": {
+      "title": "Certificate",
+      "description": "Verifiable certified graduation record with unique ID hash credentials",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userStudentId": { "type": "string" },
+        "courseId": { "type": "string" },
+        "courseName": { "type": "string" },
+        "issueDate": { "type": "string" },
+        "score": { "type": "number" },
+        "certificateNumber": { "type": "string" },
+        "qrCodeValue": { "type": "string" },
+        "signatureUrl": { "type": "string" },
+        "isRevoked": { "type": "boolean" }
+      },
+      "required": ["id", "userId", "userName", "userStudentId", "courseId", "courseName", "issueDate", "score", "certificateNumber", "qrCodeValue"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Alert notification trigger logs broadcasted to individual learners",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string", "enum": ["welcome", "completion", "quiz", "certificate", "system"] },
+        "isRead": { "type": "boolean" },
+        "date": { "type": "string" }
+      },
+      "required": ["id", "userId", "title", "message", "type", "isRead", "date"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "Collection storing student and administrator profile tables"
+    },
+    "courses/{courseId}": {
+      "schema": "Course",
+      "description": "Collection storing active training selections and video paths"
+    },
+    "mcqs/{mcqId}": {
+      "schema": "MCQQuestion",
+      "description": "Collection storing the unified exam MCQ database"
+    },
+    "certificates/{certificateId}": {
+      "schema": "Certificate",
+      "description": "Collection storing high-security issued compliance certificates"
+    },
+    "notifications/{notifId}": {
+      "schema": "Notification",
+      "description": "Collection storing broad and individual learner alert feed"
+    }
+  }
+}

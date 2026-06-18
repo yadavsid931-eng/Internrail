@@ -1,0 +1,6 @@
+{
+  "name": "InternRail",
+  "description": "Learning management, training video playback, assessment, and certification platform for railway systems (AAWS, PIS, APC, CVVRS, ETBU).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
